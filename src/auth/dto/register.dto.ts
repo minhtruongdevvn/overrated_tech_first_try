@@ -28,13 +28,11 @@ export class RegisterDto {
   @IsNotEmpty()
   street: string;
 
-  @IsString()
-  @IsNotEmpty()
-  lat: string;
+  @IsNumber()
+  lat: number;
 
-  @IsString()
-  @IsNotEmpty()
-  lng: string;
+  @IsNumber()
+  lng: number;
 
   @IsNumber()
   countryId: number;

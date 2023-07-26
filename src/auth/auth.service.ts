@@ -1,11 +1,12 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
+import { ClientException } from 'src/utils/exception';
 import { Repository } from 'typeorm';
+import { User } from '../users/entities/user.entity';
 import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
 import { Oauth } from './entities/oauth.entity';
-import { User } from './entities/user.entity';
 import { PasswordService } from './password.service';
 
 @Injectable()
@@ -23,6 +24,8 @@ export class AuthService {
         email: dto.email,
       },
     });
+
+    if (!user) throw new ClientException('NOT_FOUND', 'user not found');
 
     const isValidPassword = await this.passwordService.validatePassword(
       dto.password,

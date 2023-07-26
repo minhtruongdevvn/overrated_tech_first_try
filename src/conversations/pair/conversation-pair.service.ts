@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { User } from 'src/auth/entities/user.entity';
+import { User } from 'src/users/entities/user.entity';
 import { ClientException } from 'src/utils/exception';
 import { Repository } from 'typeorm';
 import { UpdateConversationPairDto } from '../dto/update-conversation-pair.dto';

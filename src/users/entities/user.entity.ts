@@ -18,11 +18,11 @@ export class User extends BaseEntity {
   @Column('text')
   street: string;
 
-  @Column('text')
-  lat: string;
+  @Column('double precision')
+  lat: number;
 
-  @Column('text')
-  lng: string;
+  @Column('double precision')
+  lng: number;
 
   @Column('int')
   countryId: number;

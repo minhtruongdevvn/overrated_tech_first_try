@@ -8,6 +8,8 @@ import { ConversationsModule } from './conversations/conversations.module';
 import { DatabaseModule } from './database/database.module';
 import { FriendsModule } from './friends/friends.module';
 import { TypeORMExceptionFilter } from './utils/exception';
+import { UsersModule } from './users/users.module';
+import { ChatModule } from './chat/chat.module';
 
 @Module({
   imports: [
@@ -19,6 +21,8 @@ import { TypeORMExceptionFilter } from './utils/exception';
     ConversationsModule,
     AuthModule,
     FriendsModule,
+    UsersModule,
+    ChatModule,
   ],
   providers: [{ provide: APP_FILTER, useClass: TypeORMExceptionFilter }],
 })
