@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { User } from 'src/auth/entities/user.entity';
 import { ClientException } from 'src/utils/exception';
 import { Repository } from 'typeorm';
 import { UpdateConversationPairDto } from '../dto/update-conversation-pair.dto';
@@ -10,22 +11,26 @@ export class ConversationPairService {
   constructor(
     @InjectRepository(Conversation)
     private readonly conversationRepo: Repository<Conversation>,
+    @InjectRepository(User)
+    private readonly userRepo: Repository<User>,
   ) {}
 
-  async getByUser(userId: number, skip?: number, take?: number) {
-    return this.conversationRepo.find({
-      where: { type: true, members: userId },
-      skip,
-      take,
-    });
+  getByUser(userId: number, skip?: number, take?: number) {
+    return this.conversationRepo
+      .createQueryBuilder('conversation')
+      .where('conversation.type = :type', { type: true })
+      .andWhere(':userId = ANY(conversation.members)', { userId })
+      .skip(skip)
+      .take(take)
+      .getMany();
   }
 
   getByRelation(user1Id: number, user2Id: number) {
     return this.conversationRepo
       .createQueryBuilder('conversation')
       .where('conversation.type = :type', { type: true })
-      .andWhere('conversation.members = :user1Id', { user1Id: user1Id })
-      .andWhere('conversation.members = :user2Id', { user2Id: user2Id })
+      .andWhere(':user1Id = ANY(conversation.members)', { user1Id })
+      .andWhere(':user2Id = ANY(conversation.members)', { user2Id })
       .getOne();
   }
 
@@ -39,6 +44,12 @@ export class ConversationPairService {
   }
 
   async getOrCreate(user1Id: number, user2Id: number) {
+    if (user1Id == user2Id)
+      throw new ClientException(
+        'UNPROCESSABLE_ENTITY',
+        "you don't have friend with yourself",
+      );
+
     let convo = await this.getByRelation(user1Id, user2Id);
 
     if (!convo) {

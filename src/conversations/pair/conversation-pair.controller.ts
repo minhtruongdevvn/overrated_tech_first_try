@@ -15,7 +15,7 @@ import { ConversationPairService } from './conversation-pair.service';
 @Controller('conversations/pair')
 @UseGuards(AuthGuard)
 export class ConversationPairController {
-  constructor(private readonly convoGroupService: ConversationPairService) {}
+  constructor(private readonly convoPairService: ConversationPairService) {}
 
   @Get()
   getByUser(
@@ -23,7 +23,7 @@ export class ConversationPairController {
     @Query('skip') skip?: number,
     @Query('take') take?: number,
   ) {
-    return this.convoGroupService.getByUser(userId, skip, take);
+    return this.convoPairService.getByUser(userId, skip, take);
   }
 
   @Get('to/:userId')
@@ -31,7 +31,7 @@ export class ConversationPairController {
     @GetUser('id') user1Id: number,
     @Param('userId') user2Id: number,
   ) {
-    return this.convoGroupService.getOrCreate(user1Id, user2Id);
+    return this.convoPairService.getOrCreate(user1Id, user2Id);
   }
 
   @Put(':id')
@@ -40,6 +40,6 @@ export class ConversationPairController {
     @Param('id') convoId: number,
     @Body() dto: UpdateConversationPairDto,
   ) {
-    return this.convoGroupService.update(userId, convoId, dto);
+    return this.convoPairService.update(userId, convoId, dto);
   }
 }

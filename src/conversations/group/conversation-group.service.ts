@@ -2,10 +2,11 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from 'src/auth/entities/user.entity';
 import { ClientException, clientError } from 'src/utils/exception';
-import { Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 import { CreateConversationGroupDto } from '../dto/create-conversation-group.dto';
 import { UpdateConversationGroupDto } from '../dto/update-conversation-group.dto';
 import { Conversation } from '../entities/conversation.entity';
+import { ensureUserBelongToGroup } from '../utils';
 
 @Injectable()
 export class ConversationGroupService {
@@ -17,19 +18,20 @@ export class ConversationGroupService {
   ) {}
 
   async getByUser(userId: number, skip?: number, take?: number) {
-    return this.conversationRepo.find({
-      where: { type: false, members: userId },
-      skip,
-      take,
-    });
+    return this.conversationRepo
+      .createQueryBuilder('conversation')
+      .where('conversation.type = :type', { type: false })
+      .andWhere(':userId = ANY(conversation.members)', { userId })
+      .skip(skip)
+      .take(take)
+      .getMany();
   }
 
-  async create(dto: CreateConversationGroupDto) {
-    const { creatorId, ...convoDto } = dto;
+  async create(userId: number, dto: CreateConversationGroupDto) {
     const convo = this.conversationRepo.create({
-      ...convoDto,
+      ...dto,
       type: false,
-      members: [creatorId],
+      members: [userId],
     });
     await convo.save();
 
@@ -47,6 +49,9 @@ export class ConversationGroupService {
   }
 
   async addMember(userId: number, memberId: number, convoId: number) {
+    if (memberId == userId)
+      throw new ClientException('UNPROCESSABLE_ENTITY', 'cannot add yourself');
+
     const isMemberExist = await this.userRepo.exist({
       where: { id: memberId },
     });
@@ -54,23 +59,34 @@ export class ConversationGroupService {
     if (!isMemberExist)
       throw new ClientException('NOT_FOUND', 'member is not exist');
 
-    const isUserAuthorized = await this.conversationRepo.exist({
-      where: { members: userId },
-    });
-
-    if (!isUserAuthorized)
-      throw new ClientException('UNPROCESSABLE_ENTITY', 'not belong to group');
+    await ensureUserBelongToGroup(this.conversationRepo, convoId, userId);
 
     const updateResult = await this.conversationRepo
       .createQueryBuilder('conversation')
       .update(Conversation)
       .set({
         members: () =>
-          `(CASE WHEN '${memberId}' = ANY(my_array) THEN my_array ELSE array_append(my_array, '${memberId}') END)`,
+          `(CASE WHEN '${memberId}' = ANY(members) THEN members ELSE array_append(members, '${memberId}') END)`,
       })
       .where({ id: convoId })
       .execute();
 
     return updateResult.affected > 0;
+  }
+
+  async getMember(userId: number, convoId: number) {
+    const convo = await this.conversationRepo
+      .createQueryBuilder('conversation')
+      .where('conversation.id = :convoId', { convoId })
+      .andWhere(':userId = ANY(conversation.members)', { userId })
+      //.select('conversation.members', 'members') //todo: clarify
+      .getOne();
+
+    if (!convo) throw new ClientException('NOT_FOUND');
+
+    const { members } = convo;
+    return await this.userRepo.find({
+      where: { id: In(members.filter((e) => e != userId)) },
+    });
   }
 }

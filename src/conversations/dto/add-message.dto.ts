@@ -7,7 +7,4 @@ export class AddMessageDto {
 
   @IsNumber()
   conversationId: number;
-
-  @IsNumber()
-  userId: number;
 }

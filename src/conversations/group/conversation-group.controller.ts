@@ -29,9 +29,17 @@ export class ConversationGroupController {
     return this.convoGroupService.getByUser(userId, skip, take);
   }
 
+  @Get(':id/members')
+  getMembers(@GetUser('id') userId: number, @Param('id') id: number) {
+    return this.convoGroupService.getMember(userId, id);
+  }
+
   @Post()
-  create(@Body() dto: CreateConversationGroupDto) {
-    return this.convoGroupService.create(dto);
+  create(
+    @GetUser('id') userId: number,
+    @Body() dto: CreateConversationGroupDto,
+  ) {
+    return this.convoGroupService.create(userId, dto);
   }
 
   @Post(':id/members/:memberId')

@@ -5,8 +5,7 @@ import { User } from 'src/auth/entities/user.entity';
 import { Conversation } from './entities/conversation.entity';
 import { Message } from './entities/message.entity';
 import { ConversationGroupController, ConversationGroupService } from './group';
-import { MessagesController } from './messages.controller';
-import { MessagesService } from './messages.service';
+import { MessagesController, MessagesService } from './message';
 import { ConversationPairController, ConversationPairService } from './pair';
 
 @Module({
