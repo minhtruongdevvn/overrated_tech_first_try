@@ -1,13 +1,6 @@
 import { BaseEntity } from 'src/common';
 import { User } from 'src/users/entities/user.entity';
-import {
-  Column,
-  Entity,
-  JoinColumn,
-  ManyToOne,
-  OneToOne,
-  RelationId,
-} from 'typeorm';
+import { Column, Entity, JoinColumn, ManyToOne, RelationId } from 'typeorm';
 import { Conversation } from './conversation.entity';
 
 @Entity()
@@ -29,7 +22,7 @@ export class Message extends BaseEntity {
   @Column('bigint')
   userId: number;
 
-  @OneToOne(() => User)
+  @ManyToOne(() => User, (user) => user.messages, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'userId' })
   user: User;
 }

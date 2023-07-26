@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from 'src/users/entities/user.entity';
 import { ClientException } from 'src/utils/exception';
-import { Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 import { UpdateConversationPairDto } from '../dto/update-conversation-pair.dto';
 import { Conversation } from '../entities/conversation.entity';
 
@@ -34,7 +34,15 @@ export class ConversationPairService {
       .getOne();
   }
 
-  create(user1Id: number, user2Id: number) {
+  async create(user1Id: number, user2Id: number) {
+    const users = await this.userRepo.find({
+      where: { id: In([user1Id, user2Id]) },
+      select: { id: true },
+    });
+
+    if (users.length < 2)
+      throw new ClientException('NOT_FOUND', 'user not exist');
+
     const convo = this.conversationRepo.create({
       type: true,
       members: [user1Id, user2Id],

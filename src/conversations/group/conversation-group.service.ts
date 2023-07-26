@@ -71,7 +71,7 @@ export class ConversationGroupService {
       .where({ id: convoId })
       .execute();
 
-    return updateResult.affected > 0;
+    return updateResult.affected ? updateResult.affected > 0 : false;
   }
 
   async getMember(userId: number, convoId: number) {

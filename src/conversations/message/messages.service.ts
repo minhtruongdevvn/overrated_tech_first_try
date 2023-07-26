@@ -16,7 +16,7 @@ export class MessagesService {
   async addMessageToConvo(userId: number, dto: AddMessageDto) {
     await ensureUserBelongToGroup(this.convoRepo, dto.conversationId, userId);
 
-    const msg = this.msgRepo.create(dto);
+    const msg = this.msgRepo.create({ ...dto, userId });
     await msg.save();
 
     return msg;

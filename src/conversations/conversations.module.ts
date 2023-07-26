@@ -20,6 +20,6 @@ import { ConversationPairController, ConversationPairService } from './pair';
     ConversationPairService,
     MessagesService,
   ],
-  exports: [ConversationPairService],
+  exports: [ConversationPairService, MessagesService],
 })
 export class ConversationsModule {}

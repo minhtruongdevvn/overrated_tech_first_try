@@ -6,7 +6,8 @@ import { SecurityConfig } from 'src/configs';
 @Injectable()
 export class PasswordService {
   get bcryptSaltRounds(): string | number {
-    const securityConfig = this.configService.get<SecurityConfig>('security');
+    const securityConfig =
+      this.configService.getOrThrow<SecurityConfig>('security');
     const saltOrRounds = securityConfig.bcryptSaltOrRound;
 
     return Number.isInteger(Number(saltOrRounds))

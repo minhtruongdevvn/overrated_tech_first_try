@@ -1,5 +1,6 @@
 import { BaseEntity } from 'src/common';
-import { Column, Entity } from 'typeorm';
+import { Message } from 'src/conversations/entities/message.entity';
+import { Column, Entity, OneToMany } from 'typeorm';
 
 @Entity()
 export class User extends BaseEntity {
@@ -42,4 +43,7 @@ export class User extends BaseEntity {
 
   @Column('text')
   birthday: string;
+
+  @OneToMany(() => Message, (msg) => msg.user)
+  messages: Message[];
 }
