@@ -1,8 +1,12 @@
+import { CacheModule, CacheStore } from '@nestjs/cache-manager';
 import { ClassSerializerInterceptor, Module } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { APP_FILTER, APP_INTERCEPTOR } from '@nestjs/core';
+import { redisStore } from 'cache-manager-redis-store';
 import { AuthModule } from './auth/auth.module';
 import { ChatModule } from './chat/chat.module';
+import { AllConfigType, AppConfig } from './configs';
+import appConfig from './configs/app.config';
 import databaseConfig from './configs/database.config';
 import securityConfig from './configs/security.config';
 import { ConversationsModule } from './conversations/conversations.module';
@@ -15,7 +19,7 @@ import { TypeORMExceptionFilter } from './utils/exception';
   imports: [
     DatabaseModule,
     ConfigModule.forRoot({
-      load: [databaseConfig, securityConfig],
+      load: [databaseConfig, securityConfig, appConfig],
       isGlobal: true,
     }),
     ConversationsModule,
@@ -23,6 +27,23 @@ import { TypeORMExceptionFilter } from './utils/exception';
     FriendsModule,
     UsersModule,
     ChatModule,
+    CacheModule.registerAsync({
+      inject: [ConfigService],
+      isGlobal: true,
+      useFactory: async (config: ConfigService<AllConfigType>) => {
+        const appConfig: AppConfig = config.getOrThrow('app', { infer: true });
+        const store = await redisStore({
+          socket: {
+            host: appConfig.cacheHost,
+            port: appConfig.cachePort,
+          },
+        });
+
+        return {
+          store: store as unknown as CacheStore,
+        };
+      },
+    }),
   ],
   providers: [
     { provide: APP_FILTER, useClass: TypeORMExceptionFilter },

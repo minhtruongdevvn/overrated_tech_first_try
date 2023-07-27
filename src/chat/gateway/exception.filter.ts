@@ -6,7 +6,7 @@ import {
 } from '@nestjs/common';
 import { BaseWsExceptionFilter, WsException } from '@nestjs/websockets';
 
-@Catch(HttpException)
+@Catch(HttpException, WsException)
 export class WsExceptionFilter extends BaseWsExceptionFilter {
   catch(exception: BadRequestException, host: ArgumentsHost) {
     // client can get the error by listen for 'exception' event

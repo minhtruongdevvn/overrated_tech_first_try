@@ -20,7 +20,7 @@ export class TypeORMConfig implements TypeOrmOptionsFactory {
       database: this.configs.database,
       synchronize: this.configs.synchronize,
       keepConnectionAlive: true,
-      logging: this.configs.logging,
+      logging: false,
       entities: [__dirname + '/../../**/*.entity{.ts,.js}'],
     };
   }

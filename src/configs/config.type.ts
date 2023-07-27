@@ -8,6 +8,11 @@ export interface DatabaseConfig {
   logging?: boolean;
 }
 
+export interface AppConfig {
+  cacheHost: string;
+  cachePort: number;
+}
+
 export interface SecurityConfig {
   atSecret: string;
   atExpiration?: string;
@@ -15,6 +20,7 @@ export interface SecurityConfig {
 }
 
 export interface AllConfigType {
+  app: AppConfig;
   database: DatabaseConfig;
   security: SecurityConfig;
 }

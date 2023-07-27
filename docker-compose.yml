@@ -1,0 +1,25 @@
+version: '3.8'
+services:
+  postgres:
+    image: postgres:13
+    restart: always
+    env_file: .env
+    ports:
+      - '${DB_PORT}:${DB_PORT}'
+    volumes:
+      - ./server/postgres:/var/lib/postgresql/data
+
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+      - 8081:8080
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - 6379:6379
+
+volumes:
+  postgres:
+    name: nest-db
