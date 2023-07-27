@@ -2,18 +2,20 @@ import { CacheModule, CacheStore } from '@nestjs/cache-manager';
 import { ClassSerializerInterceptor, Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { APP_FILTER, APP_INTERCEPTOR } from '@nestjs/core';
+import { EventEmitterModule } from '@nestjs/event-emitter';
 import { redisStore } from 'cache-manager-redis-store';
 import { AuthModule } from './auth/auth.module';
 import { ChatModule } from './chat/chat.module';
+import { TypeORMExceptionFilter } from './common/exception';
 import { AllConfigType, AppConfig } from './configs';
 import appConfig from './configs/app.config';
 import databaseConfig from './configs/database.config';
 import securityConfig from './configs/security.config';
 import { ConversationsModule } from './conversations/conversations.module';
 import { DatabaseModule } from './database/database.module';
+import { ElasticSearchModule } from './elastic-search/elastic-search.module';
 import { FriendsModule } from './friends/friends.module';
 import { UsersModule } from './users/users.module';
-import { TypeORMExceptionFilter } from './utils/exception';
 
 @Module({
   imports: [
@@ -27,6 +29,8 @@ import { TypeORMExceptionFilter } from './utils/exception';
     FriendsModule,
     UsersModule,
     ChatModule,
+    ElasticSearchModule,
+    EventEmitterModule.forRoot(),
     CacheModule.registerAsync({
       inject: [ConfigService],
       isGlobal: true,

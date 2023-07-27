@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { ClientException } from 'src/common/exception';
 import { User } from 'src/users/entities/user.entity';
-import { ClientException } from 'src/utils/exception';
 import { In, Repository } from 'typeorm';
 import { UpdateConversationPairDto } from '../dto/update-conversation-pair.dto';
 import { Conversation } from '../entities/conversation.entity';

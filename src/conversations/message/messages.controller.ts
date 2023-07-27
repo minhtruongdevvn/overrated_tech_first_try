@@ -8,19 +8,29 @@ import {
   UseGuards,
 } from '@nestjs/common';
 
+import { EventEmitter2 } from '@nestjs/event-emitter';
 import { AuthGuard } from 'src/auth/guards/auth.guard';
-import { GetUser } from 'src/common';
+import { GetUser, MessageEvent } from 'src/common';
 import { AddMessageDto } from '../dto/add-message.dto';
 import { MessagesService } from './messages.service';
 
 @Controller('conversations/messages')
 @UseGuards(AuthGuard)
 export class MessagesController {
-  constructor(private readonly msgService: MessagesService) {}
+  constructor(
+    private readonly msgService: MessagesService,
+    private readonly eventEmitter: EventEmitter2,
+  ) {}
 
   @Post()
-  addMessageToConvo(@GetUser('id') id: number, @Body() dto: AddMessageDto) {
-    return this.msgService.addMessageToConvo(id, dto);
+  async addMessageToConvo(
+    @GetUser('id') id: number,
+    @Body() dto: AddMessageDto,
+  ) {
+    const msg = await this.msgService.addMessageToConvo(id, dto);
+    this.eventEmitter.emit(MessageEvent.Events.CREATED, msg);
+
+    return msg;
   }
 
   @Get('/by/:id')

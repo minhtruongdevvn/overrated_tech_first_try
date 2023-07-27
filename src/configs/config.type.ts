@@ -11,6 +11,7 @@ export interface DatabaseConfig {
 export interface AppConfig {
   cacheHost: string;
   cachePort: number;
+  elasticSearchNode: string;
 }
 
 export interface SecurityConfig {

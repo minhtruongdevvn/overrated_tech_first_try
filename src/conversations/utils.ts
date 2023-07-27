@@ -1,4 +1,4 @@
-import { ClientException } from 'src/utils/exception';
+import { ClientException } from 'src/common/exception';
 import { Repository } from 'typeorm';
 import { Conversation } from './entities/conversation.entity';
 

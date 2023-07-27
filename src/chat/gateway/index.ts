@@ -5,6 +5,7 @@ import {
   UsePipes,
   ValidationPipe,
 } from '@nestjs/common';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 import {
   ConnectedSocket,
   MessageBody,
@@ -14,6 +15,7 @@ import {
   SubscribeMessage,
   WebSocketGateway,
 } from '@nestjs/websockets';
+import { MessageEvent } from 'src/common';
 import { MessagesService } from 'src/conversations/message';
 import { ChatService } from '../chat.service';
 import { getAccessTokenFromSocket } from '../utils';
@@ -31,6 +33,7 @@ export class ChatGateway
   constructor(
     private readonly msgService: MessagesService,
     private chatService: ChatService,
+    private readonly eventEmitter: EventEmitter2,
   ) {}
 
   afterInit = (server: ChatSocketServer) => this.chatService.setServer(server);
@@ -89,6 +92,8 @@ export class ChatGateway
       userId,
       { conversationId, message },
     );
+
+    this.eventEmitter.emit(MessageEvent.Events.CREATED, newlyCreatedMessage);
 
     client.broadcast
       .to(conversationId.toString())

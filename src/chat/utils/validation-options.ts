@@ -3,7 +3,7 @@ import {
   ValidationError,
   ValidationPipeOptions,
 } from '@nestjs/common';
-import { ClientException, clientError } from 'src/utils/exception';
+import { ClientException, clientError } from 'src/common/exception';
 
 export const validationOptions: ValidationPipeOptions = {
   transform: true,

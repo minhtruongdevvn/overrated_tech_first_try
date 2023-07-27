@@ -2,8 +2,9 @@ import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Cache } from 'cache-manager';
-import { Repository } from 'typeorm';
-import { User } from './entities/user.entity';
+import { Like, Repository } from 'typeorm';
+import { UserEvent } from '../common';
+import { User as UserEntity } from './entities/user.entity';
 
 @Injectable()
 export class UsersService {
@@ -11,19 +12,27 @@ export class UsersService {
   private readonly USER_NEARBY_CACHE_KEY = 'user_nearby';
 
   constructor(
-    @InjectRepository(User) private readonly userRepo: Repository<User>,
+    @InjectRepository(UserEntity)
+    private readonly userRepo: Repository<UserEntity>,
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
   ) {}
 
+  async getUser(query: UserEvent.Payload.GetUserQuery) {
+    const { id, name } = query;
+    return this.userRepo.find({
+      where: [{ id }, { name: name ? Like(name) : undefined }],
+    });
+  }
+
   async getUsersWithinRadius(
-    user: User,
+    user: UserEntity,
     skip?: number,
     take?: number,
-  ): Promise<User[]> {
+  ): Promise<UserEntity[]> {
     const key = `${this.USER_NEARBY_CACHE_KEY}:${user.id}`;
     const { lng, lat } = user;
 
-    let users = await this.cacheManager.get<User[]>(key);
+    let users = await this.cacheManager.get<UserEntity[]>(key);
 
     if (!users) {
       users = await this.userRepo

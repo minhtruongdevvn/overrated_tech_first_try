@@ -16,6 +16,7 @@ import { JWTStrategy } from './strategies/jwt.strategy';
 @Module({
   imports: [
     TypeOrmModule.forFeature([Oauth, User]),
+
     JwtModule.registerAsync({
       useFactory: async (configService: ConfigService<AllConfigType>) => {
         const securityConfig =

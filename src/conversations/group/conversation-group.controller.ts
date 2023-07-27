@@ -9,8 +9,9 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { AuthGuard } from 'src/auth/guards/auth.guard';
-import { GetUser } from 'src/common';
+import { ConversationEvent, GetUser } from 'src/common';
 
+import { EventEmitter2 } from '@nestjs/event-emitter';
 import { CreateConversationGroupDto } from '../dto/create-conversation-group.dto';
 import { UpdateConversationGroupDto } from '../dto/update-conversation-group.dto';
 import { ConversationGroupService } from './conversation-group.service';
@@ -18,7 +19,10 @@ import { ConversationGroupService } from './conversation-group.service';
 @Controller('conversations/group')
 @UseGuards(AuthGuard)
 export class ConversationGroupController {
-  constructor(private readonly convoGroupService: ConversationGroupService) {}
+  constructor(
+    private readonly convoGroupService: ConversationGroupService,
+    private readonly eventEmitter: EventEmitter2,
+  ) {}
 
   @Get()
   getByUser(
@@ -35,11 +39,14 @@ export class ConversationGroupController {
   }
 
   @Post()
-  create(
+  async create(
     @GetUser('id') userId: number,
     @Body() dto: CreateConversationGroupDto,
   ) {
-    return this.convoGroupService.create(userId, dto);
+    const convo = await this.convoGroupService.create(userId, dto);
+    this.eventEmitter.emit(ConversationEvent.Events.CREATED, convo);
+
+    return convo;
   }
 
   @Post(':id/members/:memberId')

@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
+import { ClientException } from 'src/common/exception';
 import { ConversationPairService } from 'src/conversations/pair';
-import { ClientException } from 'src/utils/exception';
 
 @Injectable()
 export class FriendsService {
