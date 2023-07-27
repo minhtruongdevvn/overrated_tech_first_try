@@ -7,17 +7,21 @@ import {
   Query,
   UseGuards,
 } from '@nestjs/common';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 import { AuthGuard } from 'src/auth/guards/auth.guard';
-import { GetUser } from 'src/common';
+import { ConversationEvent, GetUser } from 'src/common';
 import { UpdateConversationPairDto } from '../dto/update-conversation-pair.dto';
 import { ConversationPairService } from './conversation-pair.service';
 
 @Controller('conversations/pair')
 @UseGuards(AuthGuard)
 export class ConversationPairController {
-  constructor(private readonly convoPairService: ConversationPairService) {}
+  constructor(
+    private readonly convoPairService: ConversationPairService,
+    private readonly eventEmitter: EventEmitter2,
+  ) {}
 
-  @Get()
+  @Get('me')
   getByUser(
     @GetUser('id') userId: number,
     @Query('skip') skip?: number,
@@ -26,12 +30,25 @@ export class ConversationPairController {
     return this.convoPairService.getByUser(userId, skip, take);
   }
 
+  @Get()
+  async getByName(@Query('name') name?: string) {
+    const results: any[] = await this.eventEmitter.emitAsync(
+      ConversationEvent.Events.GET,
+      name,
+    );
+
+    return results?.[0];
+  }
+
   @Get('to/:userId')
-  getOrCreate(
+  async getOrCreate(
     @GetUser('id') user1Id: number,
     @Param('userId') user2Id: number,
   ) {
-    return this.convoPairService.getOrCreate(user1Id, user2Id);
+    const convo = await this.convoPairService.getOrCreate(user1Id, user2Id);
+    this.eventEmitter.emit(ConversationEvent.Events.CREATED, convo);
+
+    return convo;
   }
 
   @Put(':id')

@@ -23,12 +23,15 @@ export class UsersController {
   }
 
   @Get()
-  async getUsers(@Query('id') id?: string, @Query('name') name?: number) {
-    const a = await this.eventEmitter.emitAsync(UserEvent.Events.GET, {
-      id,
-      name,
-    });
+  async getUsers(@Query('id') id?: number, @Query('name') name?: string) {
+    const result: any[] = await this.eventEmitter.emitAsync(
+      UserEvent.Events.GET,
+      {
+        id,
+        name,
+      },
+    );
 
-    console.log(a); //delme
+    return result?.[0];
   }
 }

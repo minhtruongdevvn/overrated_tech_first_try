@@ -33,6 +33,16 @@ export class MessagesController {
     return msg;
   }
 
+  @Get('unknown-logic')
+  async getMessages(@Query('message') message?: string) {
+    const results: any[] = await this.eventEmitter.emitAsync(
+      MessageEvent.Events.GET,
+      message,
+    );
+
+    return results?.[0];
+  }
+
   @Get('/by/:id')
   getMessageByConvo(
     @GetUser('id') userId: number,

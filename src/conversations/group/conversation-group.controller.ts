@@ -24,13 +24,23 @@ export class ConversationGroupController {
     private readonly eventEmitter: EventEmitter2,
   ) {}
 
-  @Get()
+  @Get('me')
   getByUser(
     @GetUser('id') userId: number,
     @Query('skip') skip?: number,
     @Query('take') take?: number,
   ) {
     return this.convoGroupService.getByUser(userId, skip, take);
+  }
+
+  @Get()
+  async getByName(@Query('name') name?: string) {
+    const results: any[] = await this.eventEmitter.emitAsync(
+      ConversationEvent.Events.GET,
+      name,
+    );
+
+    return results?.[0];
   }
 
   @Get(':id/members')

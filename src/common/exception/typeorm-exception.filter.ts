@@ -8,7 +8,6 @@ import { Response } from 'express';
 import {
   CannotCreateEntityIdMapError,
   EntityNotFoundError,
-  QueryFailedError,
   TypeORMError,
 } from 'typeorm';
 import { ClientErrorResponse } from './client-error-response.type';
@@ -24,7 +23,6 @@ export class TypeORMExceptionFilter implements ExceptionFilter {
     let errorMsg = '';
 
     switch (exception.constructor) {
-      case QueryFailedError:
       case EntityNotFoundError:
       case CannotCreateEntityIdMapError:
         isInternal = false;

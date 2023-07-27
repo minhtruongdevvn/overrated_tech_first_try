@@ -39,11 +39,15 @@ export class ElasticSearchQuery implements OnApplicationBootstrap {
       if (users.length > 0) {
         await this.elasticsearchService.bulk({
           index: Index.USER,
-          operations: users.map((e) => ({
-            update: { _id: e.id },
-            doc: e,
-            doc_as_upsert: true,
-          })),
+          operations: users.flatMap((e) => {
+            return [
+              { update: { _id: e.id } },
+              {
+                doc: e,
+                doc_as_upsert: true,
+              },
+            ];
+          }),
         });
       }
     }
@@ -53,22 +57,30 @@ export class ElasticSearchQuery implements OnApplicationBootstrap {
 
   @OnEvent(ConversationEvent.Events.GET)
   async getConversations(nameLike?: string) {
-    return this.elasticsearchService.search({
+    if (!nameLike) return [];
+
+    const res = await this.elasticsearchService.search({
       index: Index.CONVERSATION,
       query: {
-        wildcard: { name: nameLike ? `*${nameLike}*` : undefined },
+        wildcard: { name: `*${nameLike}*` },
       },
     });
+
+    return res.hits.hits.map((e) => e._source);
   }
 
   @OnEvent(MessageEvent.Events.GET)
   async getMessages(message?: string) {
-    await this.elasticsearchService.search({
+    if (!message) return [];
+
+    const res = await this.elasticsearchService.search({
       index: Index.MSG,
       query: {
-        wildcard: { message: message ? `*${message}*` : undefined },
+        wildcard: { message: `*${message}*` },
       },
     });
+
+    return res.hits.hits.map((e) => e._source);
   }
 
   async onApplicationBootstrap() {

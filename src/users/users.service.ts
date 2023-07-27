@@ -2,7 +2,7 @@ import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Cache } from 'cache-manager';
-import { Like, Repository } from 'typeorm';
+import { FindOptionsWhere, ILike, Repository } from 'typeorm';
 import { UserEvent } from '../common';
 import { User as UserEntity } from './entities/user.entity';
 
@@ -19,9 +19,13 @@ export class UsersService {
 
   async getUser(query: UserEvent.Payload.GetUserQuery) {
     const { id, name } = query;
-    return this.userRepo.find({
-      where: [{ id }, { name: name ? Like(name) : undefined }],
-    });
+    if (!id && !name) return [];
+
+    const where: FindOptionsWhere<UserEntity>[] = [];
+    id && where.push({ id });
+    name && where.push({ name: ILike(`%${name}%`) });
+
+    return this.userRepo.find({ where });
   }
 
   async getUsersWithinRadius(
